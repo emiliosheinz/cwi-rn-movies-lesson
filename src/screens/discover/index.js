@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useMemo} from 'react';
 
 import {
   View,
@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ScrollView,
   FlatList,
+  Animated,
 } from 'react-native';
 
 import {MovieCard} from '../../components';
@@ -18,6 +19,17 @@ export function DiscoverScreen(props) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [discoverData, setDiscoverData] = useState([]);
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  const animation = useMemo(
+    () =>
+      Animated.spring(animatedValue, {
+        toValue: 1,
+        tension: 15,
+        useNativeDriver: true,
+      }),
+    [animatedValue],
+  );
 
   useEffect(() => {
     async function getScreenData() {
@@ -26,24 +38,36 @@ export function DiscoverScreen(props) {
 
       setDiscoverData(resp.data);
       setIsLoading(false);
+      animation.start();
     }
 
     getScreenData();
-  }, []);
+  }, [animation]);
 
   function onPressCard() {
     navigation.navigate('MovieDetailsScreen');
   }
 
-  function renderMovie(movie) {
+  function renderMovie(movie, index) {
+    const initialTranslation = (index + 1) * 250;
+
+    const translateX = animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [initialTranslation, 2],
+    });
+
+    const customStyle = {transform: [{translateX}], opacity: animatedValue};
+
     return (
-      <MovieCard
-        image={movie.poster_path}
-        title={movie.title}
-        subtitle={movie.release_date}
-        id={movie.id}
-        onPressCard={onPressCard}
-      />
+      <Animated.View style={customStyle}>
+        <MovieCard
+          image={movie.poster_path}
+          title={movie.title}
+          subtitle={movie.release_date}
+          id={movie.id}
+          onPressCard={onPressCard}
+        />
+      </Animated.View>
     );
   }
 

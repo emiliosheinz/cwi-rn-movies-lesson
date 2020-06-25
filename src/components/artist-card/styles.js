@@ -5,7 +5,6 @@ export default StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 5,
     flex: 1,
-    backgroundColor: 'white',
   },
   imageContainer: {
     height: 115,
@@ -25,5 +24,9 @@ export default StyleSheet.create({
   },
   empty: {
     backgroundColor: 'transparent',
+  },
+  animatedViewStyle: {
+    flex: 1,
+    backgroundColor: 'white',
   },
 });

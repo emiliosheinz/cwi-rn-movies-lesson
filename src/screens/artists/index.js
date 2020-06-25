@@ -51,13 +51,14 @@ export function ArtistsScreen(props) {
       <FlatList
         numColumns={3}
         data={formatData(artists, 3)}
-        renderItem={({item}) => (
+        renderItem={({item, index}) => (
           <ArtistCard
             name={item.name}
             image={item.profile_path}
             onPress={() => onButtonPress(item.name, item.id)}
             empty={item.empty}
             keyExtractor={(i) => i.id}
+            index={index}
           />
         )}
       />
