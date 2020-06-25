@@ -23,8 +23,11 @@ export function ArtistsScreen(props) {
     getScreenData();
   }, []);
 
-  function onButtonPress() {
-    navigation.navigate('ArtistsDetailsScreen');
+  function onButtonPress(name, id) {
+    navigation.navigate('ArtistsDetailsScreen', {
+      artistName: name,
+      artistId: id,
+    });
   }
 
   function formatData(data, numColumns) {
@@ -52,7 +55,7 @@ export function ArtistsScreen(props) {
           <ArtistCard
             name={item.name}
             image={item.profile_path}
-            onPress={onButtonPress}
+            onPress={() => onButtonPress(item.name, item.id)}
             empty={item.empty}
             keyExtractor={(i) => i.id}
           />
