@@ -7,8 +7,20 @@ const Stack = createStackNavigator();
 
 export function DiscoverStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen component={DiscoverScreen} name="DiscoverScreen" />
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: 'center',
+        headerTintColor: '#4A4A4A',
+        headerStyle: {
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+      }}>
+      <Stack.Screen
+        component={DiscoverScreen}
+        name="DiscoverScreen"
+        options={{title: 'Discover'}}
+      />
       <Stack.Screen component={MovieDetailsScreen} name="MovieDetailsScreen" />
     </Stack.Navigator>
   );
