@@ -1,50 +1,125 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  ActivityIndicator,
+  Image,
+  Text,
+  FlatList,
+  ScrollView,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
-import {View, Text, Animated} from 'react-native';
+import {ArtistCard} from '../../components';
+import {api} from '../../services';
 
-export function MovieDetailsScreen() {
-  const animatedValue = useRef(new Animated.Value(0)).current;
+import styles from './styles';
+
+export function MovieDetailsScreen({navigation, route}) {
+  const {movieId, movieTitle} = route.params;
+
+  const [movieData, setMovieData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(animatedValue, {
-          duration: 1000,
-          toValue: 1,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedValue, {
-          duration: 1000,
-          toValue: 2,
-          useNativeDriver: false,
-        }),
-      ]),
-    ).start();
-  }, [animatedValue]);
+    navigation.setOptions({title: movieTitle});
 
-  function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
+    async function getScreenData() {
+      setIsLoading(true);
+      const {data} = await api.get(`/movies/${movieId}`);
+      setMovieData(data);
+
+      setIsLoading(false);
     }
-    return color;
+
+    getScreenData();
+  }, [movieId, movieTitle, navigation]);
+
+  function renderSynopsis() {
+    const {overview = ''} = movieData;
+    return (
+      <View style={styles.synopsisContainer}>
+        <Text style={styles.synopsisTitle}>Synopsis</Text>
+        <Text style={styles.synopsisDescription}>{overview}</Text>
+      </View>
+    );
   }
 
-  const backgroundColor = animatedValue.interpolate({
-    inputRange: [0, 1, 2],
-    outputRange: [getRandomColor(), getRandomColor(), getRandomColor()],
-  });
+  function renderGenre() {
+    const {genres = []} = movieData;
 
-  return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Animated.View
-        style={{
-          height: 100,
-          width: 100,
-          backgroundColor,
-        }}
+    return genres.map((genre, index) => {
+      const separator = index < genres.length - 1 ? '|' : '';
+      return (
+        <Text key={index} style={styles.genre}>
+          {` ${genre.name} ${separator}`}
+        </Text>
+      );
+    });
+  }
+
+  function renderHeaderInfo() {
+    const {original_language = '', release_date = '', runtime = ''} = movieData;
+
+    return (
+      <View style={styles.header}>
+        <View>
+          <Image source={{uri: movieData.backdrop_path}} style={styles.image} />
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0)', '#FFFFFF']}
+            style={styles.genreContainerGradient}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.genreContainer}>{renderGenre()}</View>
+            </ScrollView>
+          </LinearGradient>
+        </View>
+        <View style={styles.infosContainer}>
+          <Text style={styles.infos}>Language: {original_language}</Text>
+          <View style={styles.dateTime}>
+            <Text style={styles.infos}>{release_date}</Text>
+            <Text style={[styles.infos, styles.duration]}>{runtime} min</Text>
+          </View>
+        </View>
+        {renderSynopsis()}
+      </View>
+    );
+  }
+
+  function renderMovieDetails() {
+    const {cast = []} = movieData;
+
+    return (
+      <FlatList
+        ListHeaderComponent={renderHeaderInfo()}
+        keyExtractor={(item) => item.id}
+        numColumns={3}
+        data={cast}
+        renderItem={({item}) => (
+          <ArtistCard
+            name={item.name}
+            image={item.profile_path}
+            onPress={() => {
+              navigation.navigate('ArtistDetailScreen', {
+                artistName: item.name,
+                artistId: item.id,
+              });
+            }}
+          />
+        )}
       />
-    </View>
-  );
+    );
+  }
+
+  function renderContent() {
+    if (isLoading) {
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    }
+
+    return renderMovieDetails();
+  }
+
+  return renderContent();
 }

@@ -44,8 +44,11 @@ export function DiscoverScreen(props) {
     getScreenData();
   }, [animation]);
 
-  function onPressCard() {
-    navigation.navigate('MovieDetailsScreen');
+  function onPressCard(id, title) {
+    navigation.navigate('MovieDetailsScreen', {
+      movieId: id,
+      movieTitle: title,
+    });
   }
 
   function renderMovie(movie, index) {
@@ -65,7 +68,7 @@ export function DiscoverScreen(props) {
           title={movie.title}
           subtitle={movie.release_date}
           id={movie.id}
-          onPressCard={onPressCard}
+          onPressCard={() => onPressCard(movie.id, movie.title)}
         />
       </Animated.View>
     );
