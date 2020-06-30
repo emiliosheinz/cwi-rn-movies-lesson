@@ -25,4 +25,9 @@ export default StyleSheet.create({
   image: {
     flex: 1,
   },
+  touchableStart: {
+    position: 'absolute',
+    right: 0,
+    padding: 5,
+  },
 });
